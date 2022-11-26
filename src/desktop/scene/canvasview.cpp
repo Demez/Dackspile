@@ -55,7 +55,8 @@ CanvasView::CanvasView(QWidget *parent)
 	m_dpi(96),
 	m_brushCursorStyle(0),
 	m_enableViewportEntryHack(false),
-	m_brushOutlineWidth(1.0)
+	m_brushOutlineWidth(1.0),
+	m_curPressure(0.0)
 {
 	viewport()->setAcceptDrops(true);
 #ifdef Q_OS_MAC // Standard touch events seem to work better with mac touchpad
@@ -363,8 +364,21 @@ void CanvasView::drawForeground(QPainter *painter, const QRectF& rect)
 		}
 	}
 	if(m_showoutline && m_outlineSize>0 && m_penmode == PenMode::Normal && m_dragmode == ViewDragMode::None && !m_locked) {
-		QRectF outline(m_prevoutlinepoint-QPointF(m_outlineSize/2.0, m_outlineSize/2.0),
-					QSizeF(m_outlineSize, m_outlineSize));
+		int outlineSize = m_outlineSize;
+
+		// Apply Pen Pressure to the cursor size if there is pressure applied
+		if (m_curPressure > 0.f)
+		{
+			outlineSize *= m_curPressure;
+
+			// Make sure it doesn't disappear
+			outlineSize = std::min(outlineSize, 1);
+		}
+
+		QRectF outline(
+			m_prevoutlinepoint-QPointF(outlineSize/2.0, outlineSize/2.0),
+			QSizeF(outlineSize, outlineSize)
+		);
 
 		if(!m_subpixeloutline && m_outlineSize%2==0)
 			outline.translate(-0.5, -0.5);
@@ -461,8 +475,11 @@ void CanvasView::onPenDown(const paintcore::Point &p, bool right)
 	if(m_scene->hasImage()) {
 		switch(m_penmode) {
 		case PenMode::Normal:
-			if(!m_locked)
+			if (!m_locked)
+			{
 				emit penDown(p, p.pressure(), right, m_zoom / 100.0);
+				m_curPressure = p.pressure();
+			}
 			break;
 		case PenMode::Colorpick:
 			m_scene->model()->pickColor(p.x(), p.y(), 0, 0);
@@ -482,7 +499,10 @@ void CanvasView::onPenMove(const paintcore::Point &p, bool right, bool constrain
 		switch(m_penmode) {
 		case PenMode::Normal:
 			if(!m_locked)
+			{
 				emit penMove(p, p.pressure(), constrain1, constrain2);
+				m_curPressure = p.pressure();
+			}
 			break;
 		case PenMode::Colorpick:
 			m_scene->model()->pickColor(p.x(), p.y(), 0, 0);
@@ -499,6 +519,7 @@ void CanvasView::onPenUp()
 	if(!m_locked && m_penmode == PenMode::Normal)
 		emit penUp();
 
+	m_curPressure = 0;
 	m_penmode = PenMode::Normal;
 	resetCursor();
 	updateOutline();

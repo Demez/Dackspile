@@ -257,6 +257,7 @@ private:
 	qreal m_gestureStartAngle;
 
 	int m_outlineSize;
+	qreal m_curPressure;
 	bool m_showoutline, m_subpixeloutline, m_squareoutline;
 	QCursor m_dotcursor, m_colorpickcursor, m_layerpickcursor, m_zoomcursor, m_rotatecursor;
 	QCursor m_toolcursor;
