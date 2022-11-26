@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+#define _USE_MATH_DEFINES 1
 #include <QPainter>
 #include <QMouseEvent>
 #include <cmath>

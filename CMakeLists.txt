@@ -8,6 +8,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/config" ${ECM_MO
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
+set( CXX_STANDARD 20 )  # could do 23
+set( CMAKE_CXX_STANDARD 20 )  # could do 23
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
 ### generic info
 set ( WEBSITE "https://drawpile.net/" )
 set ( DRAWPILE_VERSION "2.1.20" )
@@ -73,7 +77,9 @@ if(POLICY CMP0071)
 endif()
 
 ### General compiler flags
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -Wextra -std=c++11 ${CMAKE_CXX_FLAGS}")
+if ( NOT MSVC )
+	set(CMAKE_CXX_FLAGS "-Wall -pedantic -Wextra -std=c++11 ${CMAKE_CXX_FLAGS}")
+endif()
 
 if ( APPLE )
 	set(CMAKE_CXX_FLAGS "-mmacosx-version-min=10.10 ${CMAKE_CXX_FLAGS}")

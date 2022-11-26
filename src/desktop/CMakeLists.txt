@@ -346,3 +346,6 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL Debug)
 	strip_exe ( ${CLIENTNAME} )
 endif ( )
 
+
+include( qt5.cmake )
+windeployqt( ${CLIENTNAME} )
